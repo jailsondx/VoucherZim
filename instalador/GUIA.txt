@@ -1,0 +1,90 @@
+==============================================
+  VoucherZim - Guia de execução
+==============================================
+
+ESTRUTURA DA PASTA
+  server\               Backend (Express)
+  client\               Frontend (só o build do Next.js, modo standalone)
+  ecosystem.config.cjs  Configuração do PM2
+  iniciar-pm2.bat       Inicia tudo no PM2
+  GUIA.txt              Este guia
+
+PORTAS
+  Frontend: 5004 (variável PORT, definida no ecosystem.config.cjs)
+  Backend:  NODE_SERVER_PORT do server\.env (padrão 3001)
+
+
+----------------------------------------------
+1. INICIAR COM PM2 (recomendado)
+----------------------------------------------
+Dê dois cliques em iniciar-pm2.bat.
+
+Ou, num terminal dentro desta pasta:
+  pm2 startOrRestart ecosystem.config.cjs
+  pm2 save
+
+Comandos úteis:
+  pm2 status                        Lista os serviços
+  pm2 logs                          Logs em tempo real (Ctrl+C para sair)
+  pm2 logs voucherzim-backend       Logs só do backend
+  pm2 restart voucherzim-backend    Reinicia o backend
+  pm2 restart voucherzim-frontend   Reinicia o frontend
+  pm2 stop ecosystem.config.cjs     Para os dois serviços
+  pm2 delete ecosystem.config.cjs   Remove os dois serviços do PM2
+
+Iniciar junto com o Windows:
+  O PM2 não configura isso sozinho no Windows. Uma opção é instalar o
+  pacote pm2-windows-startup (uma vez só):
+    npm install -g pm2-windows-startup
+    pm2-startup install
+  Depois rode "pm2 save" com os serviços no ar. No próximo boot o PM2
+  restaura o que foi salvo.
+
+
+----------------------------------------------
+2. INICIAR MANUALMENTE (sem PM2)
+----------------------------------------------
+Abra dois terminais. Cada serviço fica rodando enquanto o terminal
+estiver aberto.
+
+Terminal 1 - Backend:
+  cd server
+  node server.js
+
+Terminal 2 - Frontend (Prompt de Comando / cmd):
+  cd client
+  set PORT=5004
+  set HOSTNAME=0.0.0.0
+  node server.js
+
+Terminal 2 - Frontend (PowerShell):
+  cd client
+  $env:PORT = "5004"
+  $env:HOSTNAME = "0.0.0.0"
+  node server.js
+
+Para parar, pressione Ctrl+C em cada terminal.
+Se os serviços estiverem rodando no PM2, pare-os antes
+(pm2 stop ecosystem.config.cjs), senão as portas estarão ocupadas.
+
+
+----------------------------------------------
+3. ALTERANDO CONFIGURAÇÕES (.env)
+----------------------------------------------
+server\.env
+  Depois de alterar, reinicie o backend:
+    pm2 restart voucherzim-backend
+
+client\.env
+  Esta pasta não tem o código-fonte, só o build. As variáveis
+  NEXT_PUBLIC_* ficam gravadas no build, então alterar o .env daqui
+  não muda nada para elas. Altere o client\.env no PROJETO e rode o
+  instalar.bat de novo (veja o item 4).
+
+
+----------------------------------------------
+4. ATUALIZAR PARA UMA NOVA VERSÃO
+----------------------------------------------
+Rode de novo o instalar.bat do projeto apontando para esta mesma pasta.
+Ele gera um build novo do frontend, para os serviços, substitui os
+arquivos e oferece iniciar tudo de novo.
